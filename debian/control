@@ -9,10 +9,11 @@ Build-Depends: debhelper-compat (= 13),
  rustc:native,
  libstd-rust-dev,
  librust-anyhow-1+default-dev,
- librust-bitflags-1+default-dev (>= 1.2-~~),
- librust-lazy-static-1+default-dev (>= 1.4-~~),
+ librust-bitflags-2+default-dev,
  librust-libc-0.2+default-dev,
- librust-nix-0.26+default-dev,
+ librust-nix-0.29+default-dev,
+ librust-nix-0.29+fs-dev,
+ librust-nix-0.29+socket-dev,
  librust-num-cpus-1+default-dev,
  librust-tokio-1+default-dev,
  librust-tokio-1+io-util-dev,
@@ -28,6 +29,7 @@ Rules-Requires-Root: no
 Package: pve-lxc-syscalld
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends},
+Breaks: pve-container (<< 6.0.5)
 Description: PVE LXC syscall daemon
  A daemon which handles a selected subset of syscalls for unprivileged
  containers.
