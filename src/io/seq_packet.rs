@@ -9,13 +9,12 @@ use tokio::io::unix::AsyncFd;
 use crate::tools::AssertSendSync;
 
 fn seq_packet_socket(flags: SockFlag) -> nix::Result<OwnedFd> {
-    let fd = socket::socket(
+    socket::socket(
         AddressFamily::Unix,
         SockType::SeqPacket,
         flags | SockFlag::SOCK_CLOEXEC,
         None,
-    )?;
-    Ok(unsafe { OwnedFd::from_raw_fd(fd) })
+    )
 }
 
 pub struct SeqPacketListener {
@@ -33,7 +32,10 @@ impl SeqPacketListener {
     pub fn bind(address: &dyn SockaddrLike) -> Result<Self, Error> {
         let fd = seq_packet_socket(SockFlag::empty())?;
         socket::bind(fd.as_raw_fd(), address)?;
-        socket::listen(fd.as_raw_fd(), 16)?;
+        socket::listen(
+            &fd,
+            socket::Backlog::new(16).expect("backlog of 16 should be valid"),
+        )?;
 
         let fd = AsyncFd::new(fd)?;
 
@@ -116,7 +118,7 @@ impl SeqPacketSocket {
         let mut msg = AssertSendSync(libc::msghdr {
             msg_name: ptr::null_mut(),
             msg_namelen: 0,
-            msg_iov: iov.as_ptr() as _,
+            msg_iov: iov.as_mut_ptr() as _,
             msg_iovlen: iov.len(),
             msg_control: cmsg_buf.as_mut_ptr() as *mut std::ffi::c_void,
             msg_controllen: cmsg_buf.len(),
